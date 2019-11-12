@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -45,7 +45,14 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
-
+        value = util.Counter()
+        for i in range(0, self.iterations):
+            for s in self.mdp.getStates():
+                if self.mdp.isTerminal(s):
+                    continue
+                nextAction = self.computeActionFromValues(s)
+                value[s] = self.computeQValueFromValues(s, nextAction)
+            self.values = value.copy()
 
     def getValue(self, state):
         """
@@ -60,7 +67,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        sum = 0
+        for i in self.mdp.getTransitionStatesAndProbs(state, action):
+            reward = self.mdp.getReward(state, action, i[0])
+            sum = sum + i[1] * (reward + self.discount * self.values[i[0]])
+        return sum
 
     def computeActionFromValues(self, state):
         """
@@ -72,7 +83,16 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        max = -9999999999
+        action = self.mdp.getPossibleActions(state)
+        if not action:
+            return None
+        for i in action:
+            value = self.computeQValueFromValues(state, i)
+            if (value > max):
+                max = value
+                nextAction = i
+        return nextAction
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
